@@ -347,10 +347,10 @@ Mobile Responsiveness
         display:none;
     }
     .toggler-wrapper.style-23 .toggler-slider:before {
-        top: -1px;
+        top: 0;
     }
     .toggler-wrapper.style-23 .toggler-slider:after {
-        top: -1px;
+        top: 0;
     }
     #calendar .photo {
         height:18vh;
