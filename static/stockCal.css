@@ -346,10 +346,15 @@ Mobile Responsiveness
     #calendar .empty {
         display:none;
     }
+    .toggler-wrapper.style-23 .toggler-slider:before {
+        top: -1px;
+    }
+    .toggler-wrapper.style-23 .toggler-slider:after {
+        top: -1px;
+    }
     #calendar .photo {
         height:18vh;
     }
-
     .adsense {
         float:none;
         /*height:250px;*/
