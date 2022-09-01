@@ -331,7 +331,6 @@ Mobile Responsiveness
     #calendar td:first-child {
         border-top: 1px solid #efefef;
     }
-
     #calendar td {
         min-height: auto;
     }
