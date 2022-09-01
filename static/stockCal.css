@@ -335,7 +335,6 @@ Mobile Responsiveness
     #calendar td {
         min-height: auto;
     }
-
     #calendar .date {
         font-size:11px;
         align-self: flex-start;
