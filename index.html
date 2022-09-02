@@ -16,6 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/xeicon@2/xeicon.min.css">
     <script src="https://momentjs.com/downloads/moment.min.js"></script>
     <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WWC7JGQ7L6"></script>
@@ -36,6 +37,20 @@
 <div id="wrap"></div>
 <div id="enLargePhotoDim" onclick="hideEnLarge()"></div>
 <div id="enLargePhoto" onclick="hideEnLarge()"></div>
+<!--
+    https://fontawesome.com/v5/cheatsheet
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" rel="stylesheet">
+ -->
+<!-- http://xpressengine.github.io/XEIcon/index.html -->
+<div id="circularMenu" class="circular-menu circular-menu-right circular-menu-bottom">
+    <a class="floating-btn" onclick="document.getElementById('circularMenu').classList.toggle('active');"><i class="xi-bars"></i></a>
+    <menu class="items-wrapper">
+        <a href="https://www.youtube.com/channel/UCRgLTKZryOpnF1JI2y_BFKQ" target="stockCal" class="menu-item xi-youtube-play"></a>
+        <a href="https://t.me/stockIssues" target="stockCal" class="menu-item xi-telegram"></a>
+        <a href="https://open.kakao.com/o/g3Y7gyvb" target="stockCal" class="menu-item xi-kakaotalk"></a>
+        <a href="/fortune/#/fortunes" target="stockCal" class="menu-item xi-money"></a>
+    </menu>
+</div>
 <script src="./static/stockCal.js"></script>
 </body>
 </html>
