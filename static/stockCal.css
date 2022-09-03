@@ -15,7 +15,7 @@ time, mark, audio, video {
     padding: 0;
     border: 0;
     font-size: 100%;
-    font-family: 'Noto Serif KR', serif;
+    font-family: Tahoma;
     vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
@@ -114,16 +114,13 @@ caption {
     color: #aaa;
     flex: 0 0 auto;
     align-self: flex-start;
-    font-family:Verdana;
     font-size:9px;
-    letter-spacing: -1px;
 }
 
 #calendar .ico {
     padding:1px 5px 2px 4px;
     margin-right:3px;
     font-size:10px;
-    font-family:Tahoma;
     letter-spacing:-1px;
     color:#fff;
     background-color:#000;
@@ -133,17 +130,43 @@ caption {
 #calendar .event {
     position:relative;
     flex: 0 0 auto;
-    font-size: 10px;
+    font-size: 12px;
     border-radius: 4px;
     padding: 1vh;
     margin-bottom: 5px;
-    line-height: 1.75;
+    line-height: 1.5;
     background: #e4f2f2;
     border: 1px solid #b5dbdc;
     color: #009aaf;
     text-decoration: none;
+    font-weight: 700;
 }
 
+#calendar .trade {
+    color:#000;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+#calendar .createdDate {
+    float:right;
+    margin-top:12px;
+    font-size: 10px;
+    font-weight:400;
+    color:#666;
+}
+
+#calendar .earningsRatio {
+    font-size: 10px;
+    font-weight:400;
+}
+#calendar .earningsRatio.plus {
+    color:#c84a31;
+}
+#calendar .earningsRatio.minus {
+    color:#1261c4;
+}
 #calendar .content {
     margin-top:20px;
 }
@@ -154,7 +177,7 @@ caption {
     margin-top:1vh;
     background-repeat:no-repeat;
     background-position:50% 50%;
-    background-size:contain;
+    background-size:cover;
     cursor:pointer;
 }
 
@@ -271,7 +294,6 @@ caption {
     top: -2px;
     right: 29px;
     font-size: 9px;
-    font-family:Tahoma;
     font-weight:700;
     color:#000;
     opacity: 0;
@@ -287,7 +309,7 @@ caption {
     top: -2px;
     right: 30px;
     font-size: 9px;
-    font-family:Tahoma;
+    font-weight:400;
     color:#aaa;
     opacity: 0.7;
     -webkit-transition: all 300ms ease;

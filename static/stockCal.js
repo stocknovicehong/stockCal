@@ -9,26 +9,33 @@ const hideEnLarge = () => {
     document.getElementById("enLargePhotoDim").style.display = 'none';
     document.getElementById("enLargePhoto").style.display = 'none';
 };
-const toggle = (checkbox, eventId) => {
-    let arr = JSON.parse(localStorage.getItem("STOCKCAL_CHECKED_EVENTIDS")) || [];
+const toggle = (checkbox, id) => {
+    let arr = JSON.parse(localStorage.getItem("STOCKCAL_CHECKED")) || [];
     if (!checkbox.checked) {
-        const idx = arr.indexOf(eventId);
+        const idx = arr.indexOf(id);
         if (idx > -1) {arr.splice(idx, 1);}
     } else {
-        arr.push(eventId);
+        arr.push(id);
     }
-    localStorage.setItem("STOCKCAL_CHECKED_EVENTIDS", JSON.stringify(arr));
+    localStorage.setItem("STOCKCAL_CHECKED", JSON.stringify(arr));
 };
 axios.get('https://api.fureweb.com/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQEuHU7K7ZdPJhY')
 .then(r => {
     let data = {};
     for (let i = 0, items = r?.data?.data, l = items && items.length; i < l; i++) {
-        const _date = items[i].issueDate;
-        if(data[_date]) {
-            data[_date].push(items[i]);
-        } else {
-            data[_date] = [items[i]];
+        const _date = items[i]?.eventDate;
+        if(_date !== undefined) {
+            if(data[_date]) {
+                data[_date].push(items[i]);
+            } else {
+                data[_date] = [items[i]];
+            }
         }
+    }
+    for(let date in data) {
+        data[date].sort((a, b) => {
+            return a.createdDate - b.createdDate || a.updatedDate - b.updatedDate;
+        });
     }
 
     let today = moment();
@@ -47,7 +54,7 @@ axios.get('https://api.fureweb.com/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQE
     for (let i = 0; i < today_day; i++) {
         table += `<td class="day empty"></td>`;
     }
-    for (let i = 0; i < 35 - today_day; i++) {
+    for (let i = 0; i < 90 - today_day; i++) {
         const _date = today.format('yyyyMMDD');
         table += `<td id="td_${_date}" class="day${!!data[_date] ? '' : ' empty'}">
         <div class="date">${today.format('yyyy/MM/DD')}</div>
@@ -56,28 +63,26 @@ axios.get('https://api.fureweb.com/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQE
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
                     events += `<div class="event"><label class="toggler-wrapper style-23">
-                          <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED_EVENTIDS"))?.indexOf(data[_date][i]?.eventId) > -1 ? ' checked' : ''} onchange="toggle(this, ${data[_date][i]?.eventId})">
+                          <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">
                           <div class="toggler-slider">
                             <div class="toggler-knob"></div>
                           </div>
                         </label><p class="content">`;
-                    if (data[_date][i]?.share) {
-                        const share = data[_date][i].share.split(',');
-                        for (let i = 0, l = share.length; i < l; i++) {
-                            events += `<span class="ico">${share[i]}</span>`;
-                        }
+                    events += data[_date][i].linkUrl
+                    ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
+                    : `<span>${data[_date][i].title}</span>`;
+                    if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) { /*📈📉*/
+                        events += `<br/><span class="trade">- ${data[_date][i]?.share} ${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice - 0).toLocaleString("ko-KR") + '원 매수'}</span>`;
+                        const earningsRatio = ((((data[_date][i]?.price - 0) / (data[_date][i]?.buyPrice - 0)) - 1) * 100).toFixed(2);
+                        events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'} 중)</span>`;
                     }
-                    events += `${
-                        data[_date][i].linkUrl
-                            ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
-                            : `<span>${data[_date][i].title}</span>`
-                    }</p>
+                    events += `</p>
                     ${
                         data[_date][i].photoUrl
-                            ? `<div class="photo" style="background-image:url(${data[_date][i].photoUrl})" onclick="showEnLarge('${data[_date][i].photoUrl}')"></div>`
-                            : ``
+                        ? `<div class="photo" style="background-image:url(${data[_date][i].photoUrl})" onclick="showEnLarge('${data[_date][i].photoUrl}')"></div>`
+                        : ``
                     }`;
-                    events += `</div>`;
+                    events += `<div class="createdDate">${data[_date][i]?.updatedDate ? [data[_date][i]?.updatedDate.substring(2, 4), '.', data[_date][i]?.updatedDate.substring(4, 6), '.', data[_date][i]?.updatedDate.substring(6, 8)].join('') + ' 업데이트' : [data[_date][i]?.createdDate.substring(2, 4), '.', data[_date][i]?.createdDate.substring(4, 6), '.', data[_date][i]?.createdDate.substring(6, 8)].join('') + ' 작성'}</div></div>`;
                 }
                 return events;
             } else {
