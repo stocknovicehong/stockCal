@@ -200,6 +200,54 @@ caption {
     float:right;
     width:85%;
 }
+#earningsRatioTableWrap {
+    position:fixed;
+    overflow:hidden;
+    overflow-y:auto;
+    left:25%;
+    right:25%;
+    top:10%;
+    bottom:10%;
+    box-shadow: 0 0.3em 1em #000;
+    border-radius: 5px;
+}
+#earningsRatioTableDim {
+    display:none;
+    position:fixed;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    background-color:#000;
+    opacity:.5;
+    cursor:pointer;
+}
+#earningsRatioTable {
+    width:100%;
+    border-collapse: collapse;
+    font-size:10px;
+    font-family: Tahoma;
+    /*border: 1px solid #1a1a1a;*/
+}
+#earningsRatioTable caption {
+    position: sticky;
+    padding-left:30px;
+    height:40px;
+    line-height:40px;
+    top: 0;
+    text-align: left;
+    background: #fff;
+}
+#earningsRatioTable th,
+#earningsRatioTable td {
+    padding: .5rem;
+    background: #fff;
+}
+#earningsRatioTable thead {
+    position: sticky;
+    top: 40px;
+    border-bottom: 1px solid #1a1a1a;
+}
 #enLargePhotoDim {
     display:none;
     position:fixed;
