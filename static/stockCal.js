@@ -51,13 +51,18 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             }
         }
     }
+    console.log(data);
     for(let date in data) {
         data[date].sort((a, b) => {
-            return a.createdDate - b.createdDate || a.updatedDate - b.updatedDate;
+            return b.updatedDate - a.updatedDate || b.createdDate - a.createdDate;
         });
     }
+    let firstDay = moment(`${new Date().getFullYear()}/01/01`, "YYYY/MM/DD");
+    let lastDay = moment(`${new Date().getFullYear()}/12/31`, "YYYY/MM/DD");
     let today = moment();
+
     const today_day = today.day();
+
     let table = `<table id="calendar">
         <tr class="weekdays">
             <th scope="col">일요일</th>
@@ -72,6 +77,7 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     for (let i = 0; i < today_day; i++) {
         table += `<td class="day empty"></td>`;
     }
+
     for (let i = 0; i < 90 - today_day; i++) {
         const _date = today.format('yyyyMMDD');
         table += `<td id="td_${_date}" class="day${!!data[_date] ? '' : ' empty'}">
