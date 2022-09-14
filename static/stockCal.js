@@ -149,6 +149,7 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     document.getElementById('wrap').innerHTML = table;
 
     window.addEventListener('load', () => {
+        document.getElementsByTagName('html')[0].style.overflow = 'scroll';
         document.getElementById('loader').remove();
         document.getElementById('loaderDim').remove();
         let nearestDate = today.format('yyyyMMDD');
