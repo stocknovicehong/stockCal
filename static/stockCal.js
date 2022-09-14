@@ -116,7 +116,7 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
 
     for (let i = 0, l = lastDay.diff(firstDay, 'days') + 1; i < l; i++) {
         const _date = firstDay.format('YYYYMMDD');
-        table += `<td id="td_${_date}" class="day${!!data[_date] ? '' : ' empty'}">
+        table += `<td id="td_${_date}" class="day${(!!data[_date] || i === 0 || i + 1 === l) ? '' : ' empty'}">
         <div class="date" id="date_${firstDay.format('YYYYMMDD')}">${firstDay.format('YYYY/MM/DD')}</div>
         ${(() => {
             let events = '';
@@ -171,34 +171,6 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     }
     table += `</tr></table>`;
     document.getElementById('wrap').innerHTML = table;
-
-    // const prevMonth = location.hash.split('#yyyymm:')[1]
-    //     ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").subtract(1, 'months')
-    //     : moment().subtract(1, 'months');
-    // let btnPrevMonth = document.createElement('a');
-    // btnPrevMonth.className = 'btnPrevMonth1';
-    // btnPrevMonth.innerHTML = `<i class="xi-calendar-check"></i>${prevMonth.format('YYYY년<br/>MM월')}`;
-    // btnPrevMonth.href = '#';
-    // btnPrevMonth.onclick = ev => {
-    //     ev.preventDefault();
-    //     location.hash = `#yyyymm:${prevMonth.format('YYYYMM')}`
-    //     location.reload();
-    // };
-    // document.getElementsByTagName('body')[0].appendChild(btnPrevMonth);
-    //
-    // const nextMonth = location.hash.split('#yyyymm:')[1]
-    //     ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").add(1, 'months')
-    //     : moment().add(1, 'months');
-    // let btnNextMonth = document.createElement('a');
-    // btnNextMonth.className = 'btnNextMonth1';
-    // btnNextMonth.innerHTML = `<i class="xi-calendar-check"></i>${nextMonth.format('YYYY년<br/>MM월')}`;
-    // btnNextMonth.href = '#';
-    // btnNextMonth.onclick = ev => {
-    //     ev.preventDefault();
-    //     location.hash = `#yyyymm:${nextMonth.format('YYYYMM')}`;
-    //     location.reload();
-    // };
-    // document.getElementsByTagName('body')[0].appendChild(btnNextMonth);
 });
 
 window.addEventListener('load', () => {
