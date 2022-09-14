@@ -39,9 +39,13 @@ const getEmoji = earningsRatio => {
     : earningsRatio <= -3 ? '😧'
     : '😶';
 };
+const addHash = yyyymm => {
+    location.hash = `#yyyymm:${yyyymm}`
+    location.reload();
+};
+let data = {};
 axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQEuHU7K7ZdPJhY/values/LIVE!A2:AG1000?key=${KEYS[~~(Math.random() * 2)]}`)
 .then(r => {
-    let data = {};
     for (let i = 0, items = r?.data?.values, l = items && items.length; i < l; i++) {
         const _date = items[i][1];
         if(_date) {
@@ -73,13 +77,28 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             return b.updatedDate - a.updatedDate || b.createdDate - a.createdDate;
         });
     }
-    let firstDay = moment(`${new Date().getFullYear()}/01/01`, "YYYY/MM/DD");
-    let lastDay = moment(`${new Date().getFullYear()}/12/31`, "YYYY/MM/DD");
-    let today = moment();
 
-    const today_day = today.day();
+    // let firstDay = moment(`${location.hash}`, "yyyy/MM/DD");
+    // let lastDay = moment(`${new Date().getFullYear()}/12/31`, "yyyy/MM/DD");
+
+
+    let firstDay = location.hash.split('#yyyymm:')[1]
+        ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD")
+        : moment().startOf('month');
+    let lastDay = moment(firstDay).endOf('month');
+    // let today = moment();
+
+    const prevMonth = location.hash.split('#yyyymm:')[1]
+        ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").subtract(1, 'months')
+        : moment().subtract(1, 'months');
+
+    const nextMonth = location.hash.split('#yyyymm:')[1]
+        ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").add(1, 'months')
+        : moment().add(1, 'months');
+
+    // const today_day = today.day();
     const firstDay_day = firstDay.day();
-    const lastDay_day = lastDay.day();
+    // const lastDay_day = lastDay.day();
     let table = `<table id="calendar">
         <tr class="weekdays">
             <th scope="col">일요일</th>
@@ -96,11 +115,15 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     }
 
     for (let i = 0, l = lastDay.diff(firstDay, 'days') + 1; i < l; i++) {
-        const _date = firstDay.format('yyyyMMDD');
+        const _date = firstDay.format('YYYYMMDD');
         table += `<td id="td_${_date}" class="day${!!data[_date] ? '' : ' empty'}">
-        <div class="date" id="date_${firstDay.format('yyyyMMDD')}">${firstDay.format('yyyy/MM/DD')}</div>
+        <div class="date" id="date_${firstDay.format('YYYYMMDD')}">${firstDay.format('YYYY/MM/DD')}</div>
         ${(() => {
             let events = '';
+            if(i === 0) {
+                events += `<div class="event cal" onclick="addHash(\'${prevMonth.format('YYYYMM')}\')">${prevMonth.format('YYYY년 MM월 이벤트 보기')}</div>`;
+            }
+            
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
                     events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
@@ -129,10 +152,11 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
                     }`;
                     events += `<div class="createdDate">${data[_date][i]?.updatedDate ? [data[_date][i]?.updatedDate.substring(2, 4), '.', data[_date][i]?.updatedDate.substring(4, 6), '.', data[_date][i]?.updatedDate.substring(6, 8)].join('') + ' 업데이트' : [data[_date][i]?.createdDate.substring(2, 4), '.', data[_date][i]?.createdDate.substring(4, 6), '.', data[_date][i]?.createdDate.substring(6, 8)].join('') + ' 작성'}</div></div>`;
                 }
-                return events;
-            } else {
-                return '';
             }
+            if(i + 1 === l) {
+                events += `<div class="event cal" onclick="addHash(\'${nextMonth.format('YYYYMM')}\')">${nextMonth.format('YYYY년 MM월 이벤트 보기')}</div>`;
+            }
+            return events;
         })()}
     </td>`;
         if(firstDay.day() % 7 === 6) {
@@ -140,25 +164,57 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
         }
         firstDay = firstDay.add(1, 'days');
     }
-    // if (today.day() !== 6) {
-    //     for (let i = today.day(); i < 7; i++) {
-    //         table += `<td class="day">-</td>`;
-    //     }
-    // }
+    if(firstDay.day() !== 0) {
+        for (let i = firstDay.day(); i < 7; i++) {
+            table += `<td class="day empty"></td>`;
+        }
+    }
     table += `</tr></table>`;
     document.getElementById('wrap').innerHTML = table;
 
-    window.addEventListener('load', () => {
-        document.getElementsByTagName('html')[0].style.overflow = 'scroll';
-        document.getElementById('loader').remove();
-        document.getElementById('loaderDim').remove();
-        let nearestDate = today.format('yyyyMMDD');
-        for(const [key] of Object.entries(data)) {
-            if(moment(key).diff(today, 'days') >= 0) {
-                nearestDate = key;
-                break;
-            }
+    // const prevMonth = location.hash.split('#yyyymm:')[1]
+    //     ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").subtract(1, 'months')
+    //     : moment().subtract(1, 'months');
+    // let btnPrevMonth = document.createElement('a');
+    // btnPrevMonth.className = 'btnPrevMonth1';
+    // btnPrevMonth.innerHTML = `<i class="xi-calendar-check"></i>${prevMonth.format('YYYY년<br/>MM월')}`;
+    // btnPrevMonth.href = '#';
+    // btnPrevMonth.onclick = ev => {
+    //     ev.preventDefault();
+    //     location.hash = `#yyyymm:${prevMonth.format('YYYYMM')}`
+    //     location.reload();
+    // };
+    // document.getElementsByTagName('body')[0].appendChild(btnPrevMonth);
+    //
+    // const nextMonth = location.hash.split('#yyyymm:')[1]
+    //     ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD").add(1, 'months')
+    //     : moment().add(1, 'months');
+    // let btnNextMonth = document.createElement('a');
+    // btnNextMonth.className = 'btnNextMonth1';
+    // btnNextMonth.innerHTML = `<i class="xi-calendar-check"></i>${nextMonth.format('YYYY년<br/>MM월')}`;
+    // btnNextMonth.href = '#';
+    // btnNextMonth.onclick = ev => {
+    //     ev.preventDefault();
+    //     location.hash = `#yyyymm:${nextMonth.format('YYYYMM')}`;
+    //     location.reload();
+    // };
+    // document.getElementsByTagName('body')[0].appendChild(btnNextMonth);
+});
+
+window.addEventListener('load', () => {
+    let nearestDate = '';
+    for(const [key] of Object.entries(data)) {
+        if(moment(key).diff(moment(), 'days') >= 0) {
+            nearestDate = key;
+            break;
         }
-        document.getElementById(`date_${nearestDate}`).scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
-    });
+    }
+
+    setTimeout(() => {
+        if(document.getElementById(`date_${nearestDate}`)) {
+            document.getElementById(`date_${nearestDate}`).scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+        } else {
+            document.getElementById('wrap').scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+        }
+    }, 123);
 });

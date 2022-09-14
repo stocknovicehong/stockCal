@@ -18,7 +18,6 @@ time, mark, audio, video {
     font-family: Tahoma;
     vertical-align: baseline;
 }
-html{overflow:hidden}
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
@@ -142,6 +141,14 @@ caption {
     color: #009aaf;
     text-decoration: none;
     font-weight: 700;
+}
+#calendar .cal {
+    padding: 2.5vh 1vh;
+    text-align: center;
+    color:#000;
+    background:#fff;
+    border:1px solid #000;
+    cursor: pointer;
 }
 
 #calendar .trade {
@@ -602,6 +609,7 @@ caption {
         transform: rotate(360deg);
     }
 }
+
 
 /* ============================
 Mobile Responsiveness
