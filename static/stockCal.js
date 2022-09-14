@@ -24,6 +24,21 @@ const toggle = (checkbox, id) => {
     }
     localStorage.setItem("STOCKCAL_CHECKED", JSON.stringify(arr));
 };
+const getEmoji = earningsRatio => {
+    /*📈📉 😶 🙂😊😀😋😍 😧😨😰😭😱*/
+    earningsRatio -= 0;
+    return earningsRatio >= 15 ? '😍'
+    : earningsRatio >= 12 ? '😋'
+    : earningsRatio >= 9 ? '😀'
+    : earningsRatio >= 6 ? '😊'
+    : earningsRatio >= 3 ? '🙂'
+    : earningsRatio <= -15 ? '😱'
+    : earningsRatio <= -12 ? '😭'
+    : earningsRatio <= -9 ? '😰'
+    : earningsRatio <= -6 ? '😨'
+    : earningsRatio <= -3 ? '😧'
+    : '😶';
+};
 axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQEuHU7K7ZdPJhY/values/LIVE!A2:AG1000?key=${KEYS[~~(Math.random() * 2)]}`)
 .then(r => {
     let data = {};
@@ -42,7 +57,9 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
                 shareCode: items[i][8],
                 buyDate: items[i][9],
                 buyPrice: items[i][10],
-                price: items[i][11]
+                price: items[i][11],
+                sellDate: items[i][12],
+                sellPrice: items[i][13]
             };
             if(data[_date]) {
                 data[_date].push(_scheme);
@@ -51,7 +68,6 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             }
         }
     }
-    console.log(data);
     for(let date in data) {
         data[date].sort((a, b) => {
             return b.updatedDate - a.updatedDate || b.createdDate - a.createdDate;
@@ -62,7 +78,8 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     let today = moment();
 
     const today_day = today.day();
-
+    const firstDay_day = firstDay.day();
+    const lastDay_day = lastDay.day();
     let table = `<table id="calendar">
         <tr class="weekdays">
             <th scope="col">일요일</th>
@@ -74,19 +91,19 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             <th scope="col">토요일</th>
         </tr>
     <tr>`;
-    for (let i = 0; i < today_day; i++) {
+    for (let i = 0; i < firstDay_day; i++) {
         table += `<td class="day empty"></td>`;
     }
 
-    for (let i = 0; i < 90 - today_day; i++) {
-        const _date = today.format('yyyyMMDD');
+    for (let i = 0, l = lastDay.diff(firstDay, 'days') + 1; i < l; i++) {
+        const _date = firstDay.format('yyyyMMDD');
         table += `<td id="td_${_date}" class="day${!!data[_date] ? '' : ' empty'}">
-        <div class="date">${today.format('yyyy/MM/DD')}</div>
+        <div class="date" id="date_${firstDay.format('yyyyMMDD')}">${firstDay.format('yyyy/MM/DD')}</div>
         ${(() => {
             let events = '';
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
-                    events += `<div class="event"><label class="toggler-wrapper style-23">
+                    events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
                           <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">
                           <div class="toggler-slider">
                             <div class="toggler-knob"></div>
@@ -95,10 +112,14 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
                     events += data[_date][i].linkUrl
                     ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
                     : `<span>${data[_date][i].title}</span>`;
-                    if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) { /*📈📉*/
-                        events += `<br/><span class="trade">- ${data[_date][i]?.share} ${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}</span>`;
+                    if (data[_date][i]?.share && data[_date][i]?.sellDate && data[_date][i]?.sellPrice && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
+                        const earningsRatio = ((((data[_date][i]?.sellPrice.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
+                        events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share} ${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}<br/>${[data[_date][i]?.sellDate.substring(2, 4), '.', data[_date][i]?.sellDate.substring(4, 6), '.', data[_date][i]?.sellDate.substring(6, 8)].join('')} ${(data[_date][i]?.sellPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매도'}</span>`;
+                        events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'})</span>`;
+                    } else if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
                         const earningsRatio = ((((data[_date][i]?.price.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
-                        events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'} 중)</span>`;
+                        events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share} ${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}</span>`;
+                        events += data[_date][i]?.sellDate && data[_date][i]?.sellPrice ? '' : ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'} 중)</span>`;
                     }
                     events += `</p>
                     ${
@@ -114,10 +135,10 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             }
         })()}
     </td>`;
-        if(today.day() % 7 === 6) {
+        if(firstDay.day() % 7 === 6) {
             table += '</tr><tr>';
         }
-        today = today.add(1, 'days');
+        firstDay = firstDay.add(1, 'days');
     }
     // if (today.day() !== 6) {
     //     for (let i = today.day(); i < 7; i++) {
@@ -125,8 +146,18 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     //     }
     // }
     table += `</tr></table>`;
-
-    let earningsRatioTable = '';
-
     document.getElementById('wrap').innerHTML = table;
+
+    window.addEventListener('load', () => {
+        document.getElementById('loader').remove();
+        document.getElementById('loaderDim').remove();
+        let nearestDate = today.format('yyyyMMDD');
+        for(const [key] of Object.entries(data)) {
+            if(moment(key).diff(today, 'days') >= 0) {
+                nearestDate = key;
+                break;
+            }
+        }
+        document.getElementById(`date_${nearestDate}`).scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
+    });
 });

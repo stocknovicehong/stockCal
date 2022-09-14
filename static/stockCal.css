@@ -545,6 +545,62 @@ caption {
     background-color: hsla(25, 35%, 69%, 1);
 }
 
+#loaderDim {
+    position: fixed;
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+    z-index:1;
+    background-color:#fff;
+    opacity: .3;
+}
+
+#loader,
+#loader:after {
+    border-radius: 50%;
+    width: 10em;
+    height: 10em;
+}
+#loader {
+    position: fixed;
+    left:50%;
+    top:50%;
+    margin:-5em 0 0 -5em;
+    z-index:2;
+    font-size: 10px;
+    text-indent: -9999em;
+    border-top: 1em solid rgba(0,0,0, 0.2);
+    border-right: 1em solid rgba(0,0,0, 0.2);
+    border-bottom: 1em solid rgba(0,0,0, 0.2);
+    border-left: 1em solid #000000;
+    -webkit-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-animation: load8 1s infinite linear;
+    animation: load8 1s infinite linear;
+}
+@-webkit-keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@keyframes load8 {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
 /* ============================
 Mobile Responsiveness
 ============================*/
