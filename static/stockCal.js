@@ -3,7 +3,8 @@ if(typeof(axios) === 'undefined') {!function(e,t){"object"==typeof exports&&"obj
 
 const KEYS = [
     'AIzaSyBXia6lf5YjVtAROikf6SmXvhC3JZDi0kU',
-    'AIzaSyDdoVNjxsJex2jcVxQPFMfCIUVjmzajm1A'
+    'AIzaSyDdoVNjxsJex2jcVxQPFMfCIUVjmzajm1A',
+    'AIzaSyDYEMmCKcjd7cGEsjYxRY25tFZzW8aednE'
 ];
 const showEnLarge = imageUrl => {
     document.getElementById("enLargePhotoDim").style.display = 'block';
@@ -170,7 +171,9 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
         }
     }
     table += `</tr></table>`;
+    table += `<p class="warning">* 투자 판단과 의사결정 그리고 거래에 대한 모든 손익 책임은 투자자 본인에게 있습니다.</p>`
     document.getElementById('wrap').innerHTML = table;
+
 });
 
 window.addEventListener('load', () => {
