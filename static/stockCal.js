@@ -40,31 +40,33 @@ const getEmoji = earningsRatio => {
     : earningsRatio <= -3 ? '😧'
     : '😶';
 };
+
 const addHash = yyyymm => {
     location.hash = `#yyyymm:${yyyymm}`
     location.reload();
 };
 let data = {};
-axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQEuHU7K7ZdPJhY/values/LIVE!A2:AG1000?key=${KEYS[~~(Math.random() * 2)]}`)
+axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY4k5lUfEQEuHU7K7ZdPJhY/values/LIVE!A2:AG1000?key=${KEYS[~~(Math.random() * KEYS.length)]}`)
 .then(r => {
     for (let i = 0, items = r?.data?.values, l = items && items.length; i < l; i++) {
         const _date = items[i][1];
         if(_date) {
             const _scheme = {
                 eventId: items[i][0],
-                eventDate:  items[i][1],
-                title: items[i][2],
-                createdDate: items[i][3],
-                updatedDate: items[i][4],
-                linkUrl: items[i][5],
-                photoUrl: items[i][6],
-                share: items[i][7],
-                shareCode: items[i][8],
-                buyDate: items[i][9],
-                buyPrice: items[i][10],
-                price: items[i][11],
-                sellDate: items[i][12],
-                sellPrice: items[i][13]
+                eventDate: items[i][1],
+                type: items[i][2],
+                title: items[i][3],
+                createdDate: items[i][4],
+                updatedDate: items[i][5],
+                linkUrl: items[i][6],
+                photoUrl: items[i][7],
+                share: items[i][8],
+                shareCode: items[i][9],
+                buyDate: items[i][10],
+                buyPrice: items[i][11],
+                price: items[i][12],
+                sellDate: items[i][13],
+                sellPrice: items[i][14]
             };
             if(data[_date]) {
                 data[_date].push(_scheme);
@@ -81,7 +83,6 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
 
     // let firstDay = moment(`${location.hash}`, "yyyy/MM/DD");
     // let lastDay = moment(`${new Date().getFullYear()}/12/31`, "yyyy/MM/DD");
-
 
     let firstDay = location.hash.split('#yyyymm:')[1]
         ? moment(`${location.hash.split('#yyyymm:')[1]}01`, "YYYYMMDD")
@@ -118,48 +119,54 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
     for (let i = 0, l = lastDay.diff(firstDay, 'days') + 1; i < l; i++) {
         const _date = firstDay.format('YYYYMMDD');
         table += `<td id="td_${_date}" class="day${(!!data[_date] || i === 0 || i + 1 === l) ? '' : ' empty'}">
-        <div class="date" id="date_${firstDay.format('YYYYMMDD')}">${firstDay.format('YYYY/MM/DD')}</div>
-        ${(() => {
+        <div class="date" id="date_${firstDay.format('YYYYMMDD')}">${firstDay.format('YYYY/MM/DD')}</div>`;
+
+        table += `${(() => {
             let events = '';
             if(i === 0) {
                 events += `<div class="event cal" onclick="addHash(\'${prevMonth.format('YYYYMM')}\')">${prevMonth.format('YYYY년 MM월 이벤트 보기')}</div>`;
             }
-            
+
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
-                    events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
+                    if(data[_date][i]?.type === 'youtube') {
+                        events += `<iframe width="100%" src="${data[_date][i]?.linkUrl}" title="${data[_date][i]?.title}"
+                            frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen></iframe>`;
+                    } else {
+                        events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
                           <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">
                           <div class="toggler-slider">
                             <div class="toggler-knob"></div>
                           </div>
                         </label><p class="content">`;
-                    events += data[_date][i].linkUrl
-                    ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
-                    : `<span>${data[_date][i].title}</span>`;
-                    if (data[_date][i]?.share && data[_date][i]?.sellDate && data[_date][i]?.sellPrice && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
-                        const earningsRatio = ((((data[_date][i]?.sellPrice.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
-                        events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}<br/>${[data[_date][i]?.sellDate.substring(2, 4), '.', data[_date][i]?.sellDate.substring(4, 6), '.', data[_date][i]?.sellDate.substring(6, 8)].join('')} ${(data[_date][i]?.sellPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매도'}</span>`;
-                        events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'})</span>`;
-                    } else if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
-                        const earningsRatio = ((((data[_date][i]?.price.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
-                        events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}</span>`;
-                        events += data[_date][i]?.sellDate && data[_date][i]?.sellPrice ? '' : ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'} 중)</span>`;
+                        events += data[_date][i].linkUrl
+                            ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
+                            : `<span>${data[_date][i].title}</span>`;
+                        if (data[_date][i]?.share && data[_date][i]?.sellDate && data[_date][i]?.sellPrice && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
+                            const earningsRatio = ((((data[_date][i]?.sellPrice.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
+                            events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}<br/>${[data[_date][i]?.sellDate.substring(2, 4), '.', data[_date][i]?.sellDate.substring(4, 6), '.', data[_date][i]?.sellDate.substring(6, 8)].join('')} ${(data[_date][i]?.sellPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매도'}</span>`;
+                            events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'})</span>`;
+                        } else if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
+                            const earningsRatio = ((((data[_date][i]?.price.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
+                            events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매수'}</span>`;
+                            events += data[_date][i]?.sellDate && data[_date][i]?.sellPrice ? '' : ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'} 중)</span>`;
+                        }
+                        events += `</p>
+                        ${
+                            data[_date][i].photoUrl
+                                ? `<div class="photo" style="background-image:url(${data[_date][i].photoUrl})" onclick="showEnLarge('${data[_date][i].photoUrl}')"></div>`
+                                : ``
+                        }`;       
                     }
-                    events += `</p>
-                    ${
-                        data[_date][i].photoUrl
-                        ? `<div class="photo" style="background-image:url(${data[_date][i].photoUrl})" onclick="showEnLarge('${data[_date][i].photoUrl}')"></div>`
-                        : ``
-                    }`;
-                    events += `<div class="createdDate">${data[_date][i]?.updatedDate ? [data[_date][i]?.updatedDate.substring(2, 4), '.', data[_date][i]?.updatedDate.substring(4, 6), '.', data[_date][i]?.updatedDate.substring(6, 8)].join('') + ' 업데이트' : [data[_date][i]?.createdDate.substring(2, 4), '.', data[_date][i]?.createdDate.substring(4, 6), '.', data[_date][i]?.createdDate.substring(6, 8)].join('') + ' 작성'}</div></div>`;
                 }
             }
             if(i + 1 === l) {
                 events += `<div class="event cal" onclick="addHash(\'${nextMonth.format('YYYYMM')}\')">${nextMonth.format('YYYY년 MM월 이벤트 보기')}</div>`;
             }
-            return events;
-        })()}
-    </td>`;
+            return events;    
+        })()}`;
+        table += `</td>`;
         if(firstDay.day() % 7 === 6) {
             table += '</tr><tr>';
         }
