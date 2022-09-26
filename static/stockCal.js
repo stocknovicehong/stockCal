@@ -130,9 +130,12 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
                     if(data[_date][i]?.type === 'youtube') {
-                        events += `<div class="event"><iframe width="100%" src="${data[_date][i]?.linkUrl}" title="${data[_date][i]?.title}"
+                        events += `<div class="event">
+                            <p>${data[_date][i]?.title}</p>
+                            <iframe width="100%" src="${data[_date][i]?.linkUrl}" title="${data[_date][i]?.title}"
                             frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen></iframe></div>`;
+                            allowFullScreen></iframe>
+                        </div>`;
                     } else {
                         events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
                           <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">
