@@ -130,12 +130,36 @@ axios.get(`https://sheets.googleapis.com/v4/spreadsheets/17i29krdbqTThC2_w5LpnpY
             if (data[_date]) {
                 for(let i = 0, l = data[_date].length; i < l; i++) {
                     if(data[_date][i]?.type === 'youtube') {
-                        events += `<div class="event">
+                        events += `<div class="event youtube">
                             <p>${data[_date][i]?.title}</p>
                             <iframe width="100%" src="${data[_date][i]?.linkUrl}" title="${data[_date][i]?.title}"
                             frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen></iframe>
                         </div>`;
+                    } else if(data[_date][i]?.type === 'ipo') {
+                        events += `<div class="event ipo" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
+                          <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">
+                          <div class="toggler-slider">
+                            <div class="toggler-knob"></div>
+                          </div>
+                        </label><p class="content">`;
+                        events += data[_date][i].linkUrl
+                            ? `<a href="${data[_date][i].linkUrl}" target="stockCal">${data[_date][i].title}</a>`
+                            : `<span>${data[_date][i].title}</span>`;
+                        if (data[_date][i]?.share && data[_date][i]?.sellDate && data[_date][i]?.sellPrice && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
+                            const earningsRatio = ((((data[_date][i]?.sellPrice.replace(/\,/g, '') - 0) / (data[_date][i]?.buyPrice.replace(/\,/g, '') - 0)) - 1) * 100).toFixed(2);
+                            events += `<br/><span class="trade">${getEmoji(earningsRatio)} ${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 청약'}<br/>${[data[_date][i]?.sellDate.substring(2, 4), '.', data[_date][i]?.sellDate.substring(4, 6), '.', data[_date][i]?.sellDate.substring(6, 8)].join('')} ${(data[_date][i]?.sellPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 매도'}</span>`;
+                            events += ` <span class="earningsRatio ${earningsRatio >= 0 ? 'plus' : 'minus'}">(${earningsRatio >= 0 ? earningsRatio + '% 수익' : Math.abs(earningsRatio) + '% 손실'})</span>`;
+                        } else if (data[_date][i]?.share && data[_date][i]?.buyDate && data[_date][i]?.buyPrice && data[_date][i]?.price) {
+                            events += `<br/><span class="trade">${data[_date][i]?.share}<br/>${[data[_date][i]?.buyDate.substring(2, 4), '.', data[_date][i]?.buyDate.substring(4, 6), '.', data[_date][i]?.buyDate.substring(6, 8)].join('')} ${(data[_date][i]?.buyPrice.replace(/\,/g, '') - 0).toLocaleString("ko-KR") + '원 청약'}</span>`;
+                        }
+                        events += `</p>
+                        ${
+                            data[_date][i].photoUrl
+                                ? `<div class="photo" style="background-image:url(${data[_date][i].photoUrl})" onclick="showEnLarge('${data[_date][i].photoUrl}')"></div>`
+                                : ``
+                        }`;
+                        events += `<div class="createdDate">${data[_date][i]?.updatedDate ? [data[_date][i]?.updatedDate.substring(2, 4), '.', data[_date][i]?.updatedDate.substring(4, 6), '.', data[_date][i]?.updatedDate.substring(6, 8)].join('') + ' 업데이트' : [data[_date][i]?.createdDate.substring(2, 4), '.', data[_date][i]?.createdDate.substring(4, 6), '.', data[_date][i]?.createdDate.substring(6, 8)].join('') + ' 작성'}</div></div>`;
                     } else {
                         events += `<div class="event" id="event_${data[_date][i]?.eventId}"><label class="toggler-wrapper style-23">
                           <input type="checkbox"${JSON.parse(localStorage.getItem("STOCKCAL_CHECKED"))?.indexOf(data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')) > -1 ? ' checked' : ''} onchange="toggle(this, \'${data[_date][i]?.eventId + (data[_date][i]?.updatedDate ? '-' + data[_date][i]?.updatedDate : '')}\')">

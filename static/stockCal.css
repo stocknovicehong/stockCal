@@ -159,6 +159,19 @@ caption {
     font-weight: 400;
     line-height: 1;
 }
+#calendar .event.youtube {
+    background: #FFD1D1;
+    border: 1px solid #BB6464;
+    color: #f00;
+}
+#calendar .event.ipo {
+    background: #ECE5C7;
+    border: 1px solid #CDC2AE;
+    color: #354259;
+}
+#calendar .event.ipo a {
+    color: #354259;
+}
 
 #calendar .createdDate {
     float:right;
