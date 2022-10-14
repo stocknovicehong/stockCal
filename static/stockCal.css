@@ -484,6 +484,11 @@ caption {
     background-color: hsla(0,0%,0%,.1);
     transition: transform .3s ease, background .2s ease;
 }
+.circular-menu .menu-item span {
+    font-size:.7em;
+    vertical-align:.15em;
+    letter-spacing: -1px;
+}
 
 .circular-menu .menu-item:hover {
     background-color: hsla(0,0%,0%,.3);
